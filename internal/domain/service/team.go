@@ -1,8 +1,7 @@
-package domain
+package domain_service
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 
 	domain "github.com/example/avito_test_task_internship/internal/domain/entity"
@@ -14,7 +13,7 @@ type TeamService struct {
 	database *infrasctucture.PostgresDb
 }
 
-func (s *TeamService) Add(ctx context.Context, teamName string, users []domain.User) ([]*domain.User, error) {
+func (s *TeamService) CreateTeam(ctx context.Context, teamName string, users []domain.User) ([]*domain.User, error) {
 	tx, err := s.database.Pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.Serializable, // максимальная изоляция
 	})
@@ -40,7 +39,7 @@ func (s *TeamService) Add(ctx context.Context, teamName string, users []domain.U
 	}
 	if count > 0 {
 		slog.Info("team already exists:", "teamName", teamName)
-		return nil, errors.New("team already exists")
+		return nil, ErrTeamExists
 	}
 
 	// 2. Проверяем уникальность пользователей
@@ -60,7 +59,7 @@ func (s *TeamService) Add(ctx context.Context, teamName string, users []domain.U
 				"user_id", u.UserID,
 				"username", u.Username,
 			)
-			return nil, errors.New("user already exists with ID or username")
+			return nil, ErrTeamMemberAlreadyExists
 		}
 	}
 
@@ -92,7 +91,7 @@ func (s *TeamService) Add(ctx context.Context, teamName string, users []domain.U
 	return result, nil
 }
 
-func (s *TeamService) Get(ctx context.Context, teamName string) ([]*domain.User, error) {
+func (s *TeamService) GetTeam(ctx context.Context, teamName string) ([]*domain.User, error) {
 	rows, err := s.database.Pool.Query(ctx,
 		"SELECT user_id, username, is_active, team_name FROM users WHERE team_name = $1",
 		teamName,
@@ -115,7 +114,7 @@ func (s *TeamService) Get(ctx context.Context, teamName string) ([]*domain.User,
 
 	if len(users) == 0 {
 		slog.Error("team not found", "teamName", teamName)
-		return nil, errors.New("team not found")
+		return nil, ErrTeamNotFound
 	}
 
 	return users, nil

@@ -86,11 +86,6 @@ func NewConfig() Config {
 		log.Println("No .env file found")
 	}
 
-	secretKey := os.Getenv("SECRET_KEY")
-	if secretKey == "" {
-		log.Fatalf("SECRET_KEY is not set")
-	}
-
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		log.Fatalf("CONFIG_PATH is not set")

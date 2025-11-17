@@ -11,8 +11,9 @@ import (
 	"github.com/example/avito_test_task_internship/configs"
 	"github.com/example/avito_test_task_internship/internal/application"
 	"github.com/example/avito_test_task_internship/internal/infrasctucture"
-	presentation_http "github.com/example/avito_test_task_internship/internal/presentation/http"
+	presentation "github.com/example/avito_test_task_internship/internal/presentation/http"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
@@ -22,12 +23,11 @@ func main() {
 	)
 	slog.SetDefault(logger)
 
-	logger.Info("Starting merch store api", slog.String("env", cfg.Env))
+	logger.Info("Starting app", slog.String("env", cfg.Env))
 	logger.Debug("Debug messages are enabled")
 
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout*time.Second)
 	defer cancel()
-
 	connStr, err := cfg.BuildPGConnString()
 	if err != nil {
 		log.Fatalf("Error building connection to database string: %v", err)
@@ -38,7 +38,12 @@ func main() {
 	application.InitRegistry(database)
 
 	r := chi.NewRouter()
-	presentation_http.RegisterRoutes(r)
-
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.URLFormat)
+	r.Use(middleware.Compress(5))
+	r.Use(middleware.Timeout(cfg.Timeout * time.Second))
+	presentation.RegisterRoutes(r)
 	http.ListenAndServe(cfg.HTTPServerConfig.Address, r)
 }

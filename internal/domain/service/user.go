@@ -1,8 +1,7 @@
-package domain
+package domain_service
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 
 	domain "github.com/example/avito_test_task_internship/internal/domain/entity"
@@ -31,7 +30,7 @@ func (s *UserService) SetIsActive(ctx context.Context, userId string, isActive b
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			slog.Error("user not found", "user_id", userId)
-			return nil, errors.New("user not found")
+			return nil, ErrUserNotFound
 		}
 		slog.Error("failed to select user", "error", err)
 		return nil, err
@@ -55,7 +54,7 @@ func (s *UserService) SetIsActive(ctx context.Context, userId string, isActive b
 	return &u, nil
 }
 
-func (s *UserService) GetReview(ctx context.Context, userId string) ([]*domain.PullRequest, error) {
+func (s *UserService) GetReviews(ctx context.Context, userId string) ([]*domain.PullRequest, error) {
 	rows, err := s.database.Pool.Query(ctx,
 		`SELECT id, name, status, author, createdat, mergedat 
 		 FROM pullRequests 
@@ -78,7 +77,7 @@ func (s *UserService) GetReview(ctx context.Context, userId string) ([]*domain.P
 
 	if len(prs) == 0 {
 		slog.Info("no pull requests found for user:", "userId", userId)
-		return nil, errors.New("no pull requests found for user")
+		return nil, ErrNoPullRequestUser
 	}
 
 	return prs, nil
