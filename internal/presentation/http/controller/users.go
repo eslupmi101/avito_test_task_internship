@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/example/avito_test_task_internship/internal/application"
@@ -29,6 +30,7 @@ func SetIsActive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	slog.Debug(req.UserId)
 	u, err := application.UserServiceInstance.SetIsActive(ctx, req.UserId, req.IsActive)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {

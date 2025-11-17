@@ -100,9 +100,51 @@ CREATE TABLE pull_request_reviewers (
 1. Настроить `.env` из .env_example с данными для подключения к PostgreSQL.
 
 
+2. Развернуть локально приложение
 ```bash
 make docker-compose-infra-up
+make go-migrate
 make run
 ```
 
-4. HTTP API доступен на `http://localhost:8080`.
+3. HTTP API доступен на `http://localhost:8080`.
+
+
+## Примеры запросов
+
+Создание команды
+```
+curl -X POST http://localhost:8080/team/add \
+  -H "Content-Type: application/json" \
+  -d '{
+    "team_name": "payments",
+    "members": [
+      {
+        "user_id": "u1",
+        "username": "Alice",
+        "is_active": true
+      },
+      {
+        "user_id": "u2",
+        "username": "Bob",
+        "is_active": true
+      }
+    ]
+  }'
+```
+
+Получить команд
+```
+curl -X GET "http://localhost:8080/team/get?team_name=payments"
+```
+
+Поменять активность пользователя
+```
+curl -X POST "http://localhost:8080/users/setIsActive" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "user_id": "u2",
+  "is_active": true
+    }'
+```
+

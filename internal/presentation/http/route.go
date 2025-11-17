@@ -7,7 +7,7 @@ import (
 
 func RegisterRoutes(r chi.Router) {
 	r.Post("/team/add", controller.AddTeam)
-	r.Get("/team/{team_name}", controller.GetTeam)
+	r.Get("/team/get", controller.GetTeam)
 
 	r.Post("/users/setIsActive", controller.SetIsActive)
 	r.Get("/users/getReview/{user_id}", controller.GetReview)
