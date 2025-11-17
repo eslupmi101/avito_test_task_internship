@@ -1,4 +1,4 @@
-CREATE TABLE pullRequests (
+CREATE TABLE pull_requests (
     id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     status VARCHAR(6) NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN','MERGED')),
@@ -20,6 +20,6 @@ $$ LANGUAGE plpgsql;
 
 -- Триггер на обновление статуса
 CREATE TRIGGER trg_set_merged_at
-BEFORE UPDATE ON pullRequests
+BEFORE UPDATE ON pull_requests
 FOR EACH ROW
 EXECUTE FUNCTION set_merged_at();
